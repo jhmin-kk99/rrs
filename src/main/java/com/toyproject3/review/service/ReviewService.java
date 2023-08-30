@@ -3,13 +3,14 @@ package com.toyproject3.review.service;
 import com.toyproject3.review.model.ReviewEntity;
 import com.toyproject3.review.repository.RestaurantRepository;
 import com.toyproject3.review.repository.ReviewRepository;
-import jakarta.persistence.Table;
+import com.toyproject3.review.service.dto.ReviewDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,5 +35,20 @@ public class ReviewService {
         ReviewEntity review = reviewRepository.findById(reviewId).orElseThrow();
 
         reviewRepository.delete(review);
+    }
+
+    public ReviewDto getRestaurantReview(Long restaurantId, Pageable page){
+        Double avgScore = reviewRepository.getAvgScoreByRestaurantId(restaurantId);
+        Slice<ReviewEntity> reviews = reviewRepository.findSliceByRestaurantId(restaurantId, page);
+
+        return ReviewDto.builder()
+                .avgScore(avgScore)
+                .reviews(reviews.getContent())
+                .page(
+                        ReviewDto.ReviewDtoPage.builder()
+                                .offset(page.getPageNumber() * page.getPageSize())
+                                .limit(page.getPageSize())
+                                .build()
+                ).build();
     }
 }
