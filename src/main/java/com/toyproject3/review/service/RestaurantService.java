@@ -1,6 +1,8 @@
 package com.toyproject3.review.service;
 
 import com.toyproject3.review.api.request.CreateAndEditRestaurantRequest;
+import com.toyproject3.review.api.response.RestaurantDetailView;
+import com.toyproject3.review.api.response.RestaurantView;
 import com.toyproject3.review.model.MenuEntity;
 import com.toyproject3.review.model.RestaurantEntity;
 import com.toyproject3.review.repository.MenuRepository;
@@ -76,5 +78,42 @@ public class RestaurantService {
 
         List<MenuEntity> menus = menuRepository.findAllByRestaurantId(restaurantId);
         menuRepository.deleteAll(menus);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RestaurantView> getAllRestaurants(){
+        List<RestaurantEntity> restaurants = restaurantRepository.findAll();
+        return restaurants.stream().map((restaurant)-> RestaurantView.builder()
+                .id(restaurant.getId())
+                .name(restaurant.getName())
+                .address(restaurant.getAddress())
+                .createdAt(restaurant.getCreatedAt())
+                .updatedAt(restaurant.getUpdatedAt())
+                .build()).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public RestaurantDetailView getRestaurantDetail(Long restaurantId){
+        RestaurantEntity restaurant = restaurantRepository.findById(restaurantId).orElseThrow();
+        List<MenuEntity> menus = menuRepository.findAllByRestaurantId(restaurantId);
+
+        return RestaurantDetailView.builder()
+                .id(restaurant.getId())
+                .name(restaurant.getName())
+                .address(restaurant.getAddress())
+                .createdAt(restaurant.getCreatedAt())
+                .updatedAt(restaurant.getUpdatedAt())
+                .menus(
+                        menus.stream().map((menu) -> RestaurantDetailView.Menu.builder()
+                                .id(menu.getId())
+                                .name(menu.getName())
+                                .price(menu.getPrice())
+                                .createdAt(menu.getCreatedAt())
+                                .updatedAt(menu.getUpdatedAt())
+                                        .build()
+                ).toList()
+                )
+                .build();
+
     }
 }

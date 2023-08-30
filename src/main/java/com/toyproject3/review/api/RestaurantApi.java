@@ -1,10 +1,15 @@
 package com.toyproject3.review.api;
 
 import com.toyproject3.review.api.request.CreateAndEditRestaurantRequest;
+import com.toyproject3.review.api.response.RestaurantDetailView;
+import com.toyproject3.review.api.response.RestaurantView;
 import com.toyproject3.review.model.RestaurantEntity;
 import com.toyproject3.review.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.ZonedDateTime;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -12,14 +17,14 @@ public class RestaurantApi {
     private  final RestaurantService restaurantService;
 
     @GetMapping("/restaurants")
-    public String getRestaurants(){
-        return "This is getRestaurants";
+    public List<RestaurantView> getRestaurants(){
+        return restaurantService.getAllRestaurants();
     }
     @GetMapping("/restaurant/{restaurantId}")
-    public String getRestaurant(
+    public RestaurantDetailView getRestaurant(
             @PathVariable Long restaurantId
     ){
-        return "This is getRestaurant, "+ restaurantId;
+        return restaurantService.getRestaurantDetail(restaurantId);
     }
 
     @PostMapping("/restaurant")
